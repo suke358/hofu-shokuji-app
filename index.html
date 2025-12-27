@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>防府周辺 総合検索ポータル</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <h1>防府周辺 総合検索ポータル</h1>
+
+    <div class="seasonal-container">
+        <div class="seasonal-card">
+            <h3>📅 <span id="display-month"></span>月の旬な食材</h3>
+            <div id="seasonal-food" class="seasonal-content">読み込み中...</div>
+        </div>
+        <div class="seasonal-card event">
+            <h3>🎉 <span id="display-month-event"></span>月のイベント</h3>
+            <div id="seasonal-event" class="seasonal-content">読み込み中...</div>
+        </div>
+    </div>
+
+    <div id="loading">データを取得しています...</div>
+    <input type="text" id="searchInput" placeholder="お店名や場所で検索..." style="display:none;">
+    
+    <div class="filter-bar" style="display:none;">
+        <button class="filter-btn" data-filter="category">カテゴリ ▼</button>
+        <button class="filter-btn" data-filter="area">地域 ▼</button>
+        <button class="filter-btn" data-filter="budget">予算 ▼</button>
+        <button class="reset-btn">リセット</button>
+        
+        <div id="categoryMenu" class="popup-menu">
+            <div class="popup-item" data-value="お手軽">お手軽</div>
+            <div class="popup-item" data-value="ガッツリ">ガッツリ</div>
+            <div class="popup-item" data-value="和食">和食</div>
+            <div class="popup-item" data-value="洋食">洋食</div>
+        </div>
+        <div id="areaMenu" class="popup-menu">
+            <div class="popup-item" data-value="防府">防府</div>
+            <div class="popup-item" data-value="山口">山口</div>
+        </div>
+        <div id="budgetMenu" class="popup-menu">
+            <div class="popup-item" data-value="1000">〜¥1,000</div>
+            <div class="popup-item" data-value="2000">¥2,000</div>
+            <div class="popup-item" data-value="3000">¥3,000〜</div>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="restaurantTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>お店名</th>
+                    <th>カテゴリ</th>
+                    <th>場所・備考</th>
+                    <th>評価</th>
+                    <th>予算</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-title"></h2>
+            <img id="modal-img" class="modal-img" src="" alt="">
+            <p id="modal-desc"></p>
+        </div>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
