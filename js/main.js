@@ -5,6 +5,7 @@ let allRestaurants = [];
 
 async function init() {
     try {
+        // 季節情報の読み込み
         const sRes = await fetch(SEASONAL_CSV);
         const sText = await sRes.text();
         const sRows = sText.trim().split('\n').map(row => row.split(','));
@@ -17,16 +18,19 @@ async function init() {
             if(document.getElementById('seasonal-event')) document.getElementById('seasonal-event').textContent = currentData[2];
         }
 
+        // 飲食店情報の読み込み（日本語見出しに対応）
         const rRes = await fetch(RESTAURANT_CSV);
         const rText = await rRes.text();
-        const rRows = rText.trim().split('\n').slice(1); 
-        allRestaurants = rRows.map(row => {
-            const cols = row.split(',');
-            return {
-                name: cols[0] || "", category: cols[1] || "", area: cols[2] || "",
-                rating: cols[3] || "0", budget: cols[4] || "", map: cols[5] || "",
-                img: cols[6] || "", note: cols[7] || ""
-            };
+        const rows = rText.trim().split('\n').map(row => row.split(','));
+        const headers = rows[0]; // 1行目を見出しとして取得
+        const dataRows = rows.slice(1); // 2行目以降がデータ
+
+        allRestaurants = dataRows.map(row => {
+            let obj = {};
+            headers.forEach((header, index) => {
+                obj[header.trim()] = row[index] ? row[index].trim() : "";
+            });
+            return obj;
         });
 
         renderTable(allRestaurants);
@@ -45,40 +49,57 @@ function renderTable(data) {
     tbody.innerHTML = '';
 
     data.forEach(r => {
-        if (!r.name) return;
+        if (!r['店名']) return;
         const tr = document.createElement('tr');
 
-        // --- 修正ポイント：星の数を最大5つに制限する ---
-        let ratingNum = parseInt(r.rating) || 0;
-        if (ratingNum > 5) ratingNum = 5; // 5より大きい数字が来ても5にする
+        // 星の表示
+        let ratingNum = parseInt(r['評価']) || 0;
+        if (ratingNum > 5) ratingNum = 5;
         const stars = '★'.repeat(ratingNum);
-        // ------------------------------------------
 
-        const price = r.budget ? '¥' + Number(r.budget).toLocaleString() : '-';
+        // 予算の表示
+        const price = r['予算'] ? '¥' + Number(r['予算']).toLocaleString() : '-';
 
+        // --- 表の見た目：I列の「所要時間」を追加しました ---
         tr.innerHTML = `
-            <td><strong>${r.name}</strong></td>
-            <td>${r.category}</td>
-            <td>${r.area}</td>
+            <td><strong>${r['店名']}</strong></td>
+            <td>${r['カテゴリ']}</td>
+            <td>${r['場所']}</td>
             <td class="stars">${stars}</td>
             <td>${price}</td>
+            <td>${r['所要時間'] || '-'}</td>
         `;
 
+        // 詳細画面（モーダル）の設定
         tr.onclick = () => {
-            document.getElementById('modal-title').textContent = r.name;
-            document.getElementById('modal-img').src = r.img || '';
-            document.getElementById('modal-desc').innerText = `【備考】\n${r.note || '-'}\n\n【詳細】\n${r.map || '-'}`;
+            document.getElementById('modal-title').textContent = r['店名'];
+            document.getElementById('modal-img').src = r['画像URL'] || '';
+            
+            // 備考、マップ、所要時間を詳細に表示
+            document.getElementById('modal-desc').innerHTML = `
+                <p><strong>場所:</strong> ${r['場所']}</p>
+                <p><strong>予算:</strong> ${price}</p>
+                <p><strong>所要時間:</strong> ${r['所要時間'] || '未設定'}</p>
+                <p><strong>備考:</strong> ${r['備考'] || '-'}</p>
+                <hr>
+                <a href="${r['マップ']}" target="_blank" style="display:inline-block; margin-top:10px; padding:10px 20px; background:#4285f4; color:white; text-decoration:none; border-radius:5px;">Googleマップで開く</a>
+            `;
             document.getElementById('modal').style.display = 'flex';
         };
         tbody.appendChild(tr);
     });
 }
 
+// 検索機能
 const searchInput = document.getElementById('searchInput');
 if(searchInput) {
     searchInput.oninput = (e) => {
         const query = e.target.value.toLowerCase();
-        renderTable(allRestaurants.filter(r => r.name.toLowerCase().includes(query) || r.category.toLowerCase().includes(query) || r.area.toLowerCase().includes(query)));
+        renderTable(allRestaurants.filter(r => 
+            (r['店名'] && r['店名'].toLowerCase().includes(query)) || 
+            (r['カテゴリ'] && r['カテゴリ'].toLowerCase().includes(query)) || 
+            (r['場所'] && r['場所'].toLowerCase().includes(query))
+        ));
     };
 }
 
