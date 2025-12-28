@@ -1,22 +1,25 @@
 const URLS = {
     '食事': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTTaLwPw_Umxz-kntpaLlE8-YJOefutrW2a1B-alKxA77zjQPjWUj8KZZ4PGG89HKssBCO7tlRe9S72/pub?gid=0&single=true&output=csv',
-    '観光地': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTTaLwPw_Umxz-kntpaLlE8-YJOefutrW2a1B-alKxA77zjQPjWUj8KZZ4PGG89HKssBCO7tlRe9S72/pub?gid=56841696&single=true&output=csv'
+    '観光地': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTTaLwPw_Umxz-kntpaLlE8-YJOefutrW2a1B-alKxA77zjQPjWUj8KZZ4PGG89HKssBCO7tlRe9S72/pub?gid=56841696&single=true&output=csv',
+    'イベント': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTTaLwPw_Umxz-kntpaLlE8-YJOefutrW2a1B-alKxA77zjQPjWUj8KZZ4PGG89HKssBCO7tlRe9S72/pub?gid=687210558&single=true&output=csv',
+    'やりたい': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTTaLwPw_Umxz-kntpaLlE8-YJOefutrW2a1B-alKxA77zjQPjWUj8KZZ4PGG89HKssBCO7tlRe9S72/pub?gid=572836507&single=true&output=csv'
 };
 
 let allData = [];
 
-// HTMLのボタンから呼ばれる関数
+// カテゴリを切り替える関数
 async function switchCategory(category) {
-    console.log(category + "を読み込み中...");
+    // ボタンのIDリスト（index.htmlのIDと一致させています）
+    const btnIds = ['btn-食事', 'btn-観光地', 'btn-イベント', 'btn-やりたい'];
     
-    // ボタンの見た目を切り替え
-    const btnMeal = document.getElementById('btn-食事');
-    const btnSpot = document.getElementById('btn-観光地');
+    // 全ボタンの色を制御
+    btnIds.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.style.background = (id === `btn-${category}`) ? '#4285f4' : '#ccc';
+        }
+    });
     
-    if (btnMeal) btnMeal.style.background = (category === '食事') ? '#4285f4' : '#ccc';
-    if (btnSpot) btnSpot.style.background = (category === '観光地') ? '#4285f4' : '#ccc';
-    
-    // データを読み込む
     await loadData(URLS[category]);
 }
 
@@ -27,28 +30,23 @@ async function loadData(url) {
 
         const res = await fetch(url);
         const text = await res.text();
-        
-        // CSVを分解（カンマ区切りの考慮）
         const rows = text.trim().split('\n').map(row => row.split(','));
-        const headers = rows[0];
+        const headers = rows[0].map(h => h.trim());
         const dataRows = rows.slice(1);
 
         allData = dataRows.map(row => {
             let obj = {};
             headers.forEach((header, index) => {
-                const key = header.trim();
-                obj[key] = row[index] ? row[index].trim() : "";
+                obj[header] = row[index] ? row[index].trim() : "";
             });
             return obj;
         });
 
         renderTable(allData);
-        
         if (loadingEl) loadingEl.style.display = 'none';
-        // 検索窓やテーブルを表示
-        if (document.getElementById('searchInput')) document.getElementById('searchInput').style.display = 'block';
-        if (document.getElementById('restaurantTable')) document.getElementById('restaurantTable').style.display = 'table';
         
+        document.getElementById('restaurantTable').style.display = 'table';
+        document.getElementById('searchInput').style.display = 'block';
     } catch (err) {
         console.error('読み込みエラー:', err);
     }
@@ -60,12 +58,11 @@ function renderTable(data) {
     tbody.innerHTML = '';
 
     data.forEach(r => {
-        // 「店名」というキーでデータを探す
-        const name = r['店名'] || r['お店名']; 
+        const name = r['店名'] || r['お店名'];
         if (!name) return;
 
         const tr = document.createElement('tr');
-        const price = r['予算'] ? '¥' + Number(r['予算']).toLocaleString() : '-';
+        const price = (r['予算'] && r['予算'] !== '0') ? '¥' + Number(r['予算']).toLocaleString() : '無料/不明';
 
         tr.innerHTML = `
             <td><strong>${name}</strong></td>
@@ -81,7 +78,7 @@ function renderTable(data) {
             document.getElementById('modal-img').src = r['画像URL'] || '';
             document.getElementById('modal-desc').innerHTML = `
                 <p><strong>場所:</strong> ${r['場所'] || '-'}</p>
-                <p><strong>予算/入場料:</strong> ${price}</p>
+                <p><strong>費用目安:</strong> ${price}</p>
                 <p><strong>所要時間:</strong> ${r['所要時間'] || '-'}</p>
                 <p><strong>備考:</strong> ${r['備考'] || '-'}</p>
                 <hr>
@@ -93,22 +90,15 @@ function renderTable(data) {
     });
 }
 
-// 検索機能のセットアップ
-const searchInput = document.getElementById('searchInput');
-if (searchInput) {
-    searchInput.oninput = (e) => {
-        const query = e.target.value.toLowerCase();
-        renderTable(allData.filter(r => {
-            const name = (r['店名'] || r['お店名'] || "").toLowerCase();
-            const cat = (r['カテゴリ'] || "").toLowerCase();
-            return name.includes(query) || cat.includes(query);
-        }));
-    };
-}
+// 検索・閉じる処理
+document.getElementById('searchInput').oninput = (e) => {
+    const query = e.target.value.toLowerCase();
+    renderTable(allData.filter(r => 
+        (r['店名'] || r['お店名'] || "").toLowerCase().includes(query) || 
+        (r['カテゴリ'] || "").toLowerCase().includes(query)
+    ));
+};
+document.querySelector('.close').onclick = () => document.getElementById('modal').style.display = 'none';
 
-// モーダルを閉じる
-const closeBtn = document.querySelector('.close');
-if (closeBtn) closeBtn.onclick = () => document.getElementById('modal').style.display = 'none';
-
-// 起動時に「食事」を読み込む
+// 最初に「食事」を読み込む
 switchCategory('食事');

@@ -9,9 +9,11 @@
 <body>
     <h1>防府周辺 総合検索ポータル</h1>
 
-    <div style="text-align: center; margin-bottom: 20px;">
-        <button onclick="switchCategory('食事')" id="btn-食事" style="padding: 10px 20px; cursor: pointer; background: #4285f4; color: white; border: none; border-radius: 5px; margin: 0 5px;">🍴 食事</button>
-        <button onclick="switchCategory('観光地')" id="btn-観光地" style="padding: 10px 20px; cursor: pointer; background: #ccc; color: white; border: none; border-radius: 5px; margin: 0 5px;">🏛 観光地</button>
+    <div style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 10px 10px 20px 10px;">
+        <button onclick="switchCategory('食事')" id="btn-食事" style="padding: 10px 15px; cursor: pointer; background: #4285f4; color: white; border: none; border-radius: 5px; font-size: 14px; flex: 1; min-width: 80px;">🍴 食事</button>
+        <button onclick="switchCategory('観光地')" id="btn-観光地" style="padding: 10px 15px; cursor: pointer; background: #ccc; color: white; border: none; border-radius: 5px; font-size: 14px; flex: 1; min-width: 80px;">🏛 観光地</button>
+        <button onclick="switchCategory('イベント')" id="btn-イベント" style="padding: 10px 15px; cursor: pointer; background: #ccc; color: white; border: none; border-radius: 5px; font-size: 14px; flex: 1; min-width: 80px;">🎉 イベント</button>
+        <button onclick="switchCategory('やりたい')" id="btn-やりたい" style="padding: 10px 15px; cursor: pointer; background: #ccc; color: white; border: none; border-radius: 5px; font-size: 14px; flex: 1; min-width: 80px;">✨ やりたい</button>
     </div>
 
     <div class="seasonal-container">
