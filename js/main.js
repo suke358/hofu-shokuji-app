@@ -5,53 +5,80 @@ const URLS = {
     'やりたい': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTTaLwPw_Umxz-kntpaLlE8-YJOefutrW2a1B-alKxA77zjQPjWUj8KZZ4PGG89HKssBCO7tlRe9S72/pub?gid=572836507&single=true&output=csv'
 };
 
-let allData = [];
+let allMasterData = []; // 全シート合体データ
+let currentCategoryData = []; // 現在のタブのデータ
 
-// カテゴリを切り替える関数
-async function switchCategory(category) {
-    // ボタンのIDリスト（index.htmlのIDと一致させています）
-    const btnIds = ['btn-食事', 'btn-観光地', 'btn-イベント', 'btn-やりたい'];
-    
-    // 全ボタンの色を制御
-    btnIds.forEach(id => {
-        const btn = document.getElementById(id);
-        if (btn) {
-            btn.style.background = (id === `btn-${category}`) ? '#4285f4' : '#ccc';
-        }
-    });
-    
-    await loadData(URLS[category]);
-}
+// 1. 起動時に全シートを読み込む (上級者向け：一括非同期処理)
+async function initApp() {
+    const loadingEl = document.getElementById('loading');
+    if (loadingEl) loadingEl.style.display = 'block';
 
-async function loadData(url) {
     try {
-        const loadingEl = document.getElementById('loading');
-        if (loadingEl) loadingEl.style.display = 'block';
-
-        const res = await fetch(url);
-        const text = await res.text();
-        const rows = text.trim().split('\n').map(row => row.split(','));
-        const headers = rows[0].map(h => h.trim());
-        const dataRows = rows.slice(1);
-
-        allData = dataRows.map(row => {
-            let obj = {};
-            headers.forEach((header, index) => {
-                obj[header] = row[index] ? row[index].trim() : "";
+        const promises = Object.entries(URLS).map(async ([category, url]) => {
+            const res = await fetch(url);
+            const text = await res.text();
+            const rows = text.trim().split('\n').map(row => row.split(','));
+            const headers = rows[0].map(h => h.trim());
+            return rows.slice(1).map(row => {
+                let obj = { '元カテゴリ': category };
+                headers.forEach((header, index) => {
+                    obj[header] = row[index] ? row[index].trim() : "";
+                });
+                return obj;
             });
-            return obj;
         });
 
-        renderTable(allData);
+        const results = await Promise.all(promises);
+        allMasterData = results.flat(); // すべてのデータを1つに合体！
+
         if (loadingEl) loadingEl.style.display = 'none';
         
-        document.getElementById('restaurantTable').style.display = 'table';
-        document.getElementById('searchInput').style.display = 'block';
+        // 初期表示
+        switchCategory('食事');
+        loadSeasonalInfo();
     } catch (err) {
-        console.error('読み込みエラー:', err);
+        console.error('初期化エラー:', err);
     }
 }
 
+// 2. カテゴリ切り替え（読み込み済みデータから抽出）
+function switchCategory(category) {
+    const btnIds = ['btn-食事', 'btn-観光地', 'btn-イベント', 'btn-やりたい'];
+    btnIds.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.style.background = (id === `btn-${category}`) ? '#4285f4' : '#ccc';
+    });
+
+    currentCategoryData = allMasterData.filter(item => item['元カテゴリ'] === category);
+    renderTable(currentCategoryData);
+
+    document.getElementById('restaurantTable').style.display = 'table';
+    document.getElementById('searchInput').style.display = 'block';
+}
+
+// 3. 全シート対応検索
+document.getElementById('searchInput').oninput = (e) => {
+    const query = e.target.value.toLowerCase().replace(/\s+/g, ""); 
+    
+    if (query === "") {
+        renderTable(currentCategoryData);
+        return;
+    }
+
+    // ★ここが重要：currentCategoryData ではなく allMasterData 全体から探す！
+    const filtered = allMasterData.filter(r => {
+        const name = (r['店名'] || r['お店名'] || "").replace(/\s+/g, "").toLowerCase();
+        const category = (r['カテゴリ'] || "").replace(/\s+/g, "").toLowerCase();
+        const location = (r['場所'] || "").replace(/\s+/g, "").toLowerCase();
+        const biko = (r['備考'] || "").replace(/\s+/g, "").toLowerCase();
+
+        return name.includes(query) || category.includes(query) || location.includes(query) || biko.includes(query);
+    });
+
+    renderTable(filtered);
+};
+
+// 4. テーブル表示（モーダル処理込み）
 function renderTable(data) {
     const tbody = document.querySelector('#restaurantTable tbody');
     if(!tbody) return;
@@ -78,8 +105,7 @@ function renderTable(data) {
             document.getElementById('modal-img').src = r['画像URL'] || '';
             document.getElementById('modal-desc').innerHTML = `
                 <p><strong>場所:</strong> ${r['場所'] || '-'}</p>
-                <p><strong>費用目安:</strong> ${price}</p>
-                <p><strong>所要時間:</strong> ${r['所要時間'] || '-'}</p>
+                <p><strong>費用:</strong> ${price}</p>
                 <p><strong>備考:</strong> ${r['備考'] || '-'}</p>
                 <hr>
                 <a href="${r['マップ']}" target="_blank" style="display:inline-block; margin-top:10px; padding:10px 20px; background:#4285f4; color:white; text-decoration:none; border-radius:5px;">Googleマップで開く</a>
@@ -90,77 +116,28 @@ function renderTable(data) {
     });
 }
 
-// 検索・閉じる処理
-// 検索バーの動作を改良（キーワードに近いものを優先）
-// 検索バーの動作を「超強力版」に改良
-document.getElementById('searchInput').oninput = (e) => {
-    // 検索ワードから空白を消し、小文字にし、さらに「全角スペース」も消す
-    const query = e.target.value.toLowerCase().replace(/\s+/g, ""); 
-    
-    if (query === "") {
-        renderTable(allData);
-        return;
-    }
-
-    const filtered = allData.filter(r => {
-        // データの各項目からも空白をすべて消して比較する
-        const name = (r['店名'] || r['お店名'] || "").replace(/\s+/g, "").toLowerCase();
-        const category = (r['カテゴリ'] || "").replace(/\s+/g, "").toLowerCase();
-        const location = (r['場所'] || "").replace(/\s+/g, "").toLowerCase();
-        const biko = (r['備考'] || "").replace(/\s+/g, "").toLowerCase();
-
-        // キーワードが店名、カテゴリ、場所、備考のどこかに含まれているか
-        return name.includes(query) || 
-               category.includes(query) || 
-               location.includes(query) ||
-               biko.includes(query);
-    });
-
-    renderTable(filtered);
-};
-
 document.querySelector('.close').onclick = () => document.getElementById('modal').style.display = 'none';
 
-
-// 今日の日付から「月」を取得（例：12月なら 12）
+// 5. 季節情報（今日の月を取得して表示）
 const currentMonth = new Date().getMonth() + 1;
-
-// 季節情報をスプレッドシートから取得して表示
 async function loadSeasonalInfo() {
-    // 【重要】「季節情報」タブのCSV URLをここに貼ってください
     const SEASON_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTTaLwPw_Umxz-kntpaLlE8-YJOefutrW2a1B-alKxA77zjQPjWUj8KZZ4PGG89HKssBCO7tlRe9S72/pub?gid=2049390250&single=true&output=csv';
-
     try {
         const res = await fetch(SEASON_URL);
         const text = await res.text();
         const rows = text.trim().split('\n').map(row => row.split(','));
-        const dataRows = rows.slice(1);
+        const currentMonthData = rows.slice(1).filter(r => parseInt(r[0]) === currentMonth);
 
-        // スプレッドシートのA列（月）が今の月と一致する行をすべて探す
-        const currentMonthData = dataRows.filter(r => parseInt(r[0]) === currentMonth);
-
-        // --- ここから下を丸ごと入れ替え ---
         if (currentMonthData.length > 0) {
-            // 改行（<br>）でつなげて、先頭に「・」をつける
             const foodList = currentMonthData.map(r => r[1] ? `・${r[1]}` : "").filter(v => v).join('<br>');
             const eventList = currentMonthData.map(r => r[2] ? `・${r[2]}` : "").filter(v => v).join('<br>');
-
-            // 反映させる（.innerHTML を使うことで改行が有効になります）
-            if(document.getElementById('seasonal-food')) document.getElementById('seasonal-food').innerHTML = foodList || "情報なし";
-            if(document.getElementById('seasonal-event')) document.getElementById('seasonal-event').innerHTML = eventList || "情報なし";
-            
-            if(document.getElementById('display-month')) document.getElementById('display-month').textContent = currentMonth;
-            if(document.getElementById('display-month-event')) document.getElementById('display-month-event').textContent = currentMonth;
-        } else {
-            // データが見つからなかった時の表示
-            if(document.getElementById('seasonal-food')) document.getElementById('seasonal-food').textContent = "今月の情報はありません";
-            if(document.getElementById('seasonal-event')) document.getElementById('seasonal-event').textContent = "今月の予定はありません";
+            document.getElementById('seasonal-food').innerHTML = foodList || "情報なし";
+            document.getElementById('seasonal-event').innerHTML = eventList || "情報なし";
+            document.getElementById('display-month').textContent = currentMonth;
+            document.getElementById('display-month-event').textContent = currentMonth;
         }
-    } catch (err) {
-        console.error('季節情報の読み込み失敗:', err);
-    }
+    } catch (err) { console.error('季節情報失敗', err); }
 }
 
-// 起動時に実行
-loadSeasonalInfo();
-switchCategory('食事');
+// 実行！
+initApp();
