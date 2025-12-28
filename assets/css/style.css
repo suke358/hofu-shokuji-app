@@ -38,34 +38,40 @@ h1 {
     flex-wrap: wrap; 
     gap: 15px; 
     margin-bottom: 20px; 
-    /* ★カードを横いっぱいに広げる設定 */
-    justify-content: space-between; 
+    width: 100%; /* 横いっぱいに広げる */
 }
 
 .seasonal-card { 
-    flex: 1; 
-    min-width: 300px; 
-    /* ★高さを揃えるための設定 */
-    height: 180px; 
+    flex: 1; /* ★左右均等に広がるようにする */
+    min-width: 300px; /* スマホで見ても崩れない最小幅 */
+    height: 180px;   /* ★高さを固定して左右を揃える */
     background: white; 
     padding: 15px; 
     border-radius: 12px; 
     box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
     border-left: 6px solid #ff9800; 
-    /* ★中身を縦に整列 */
-    display: flex;
+    display: flex; /* 中身を縦に整列させる準備 */
     flex-direction: column;
 }
 
 .seasonal-card.event { 
-    border-left: none;
-    background: #2196f3; 
-    color: white;
+    border-left: #e67e22; /* イベントは全体を青くするので線を消す */
+    background: #ffffff; 
+    color: rgb(29, 28, 28);
 }
 
-/* ★カード内のスクロールエリアの高さを固定 */
+.seasonal-card h3 { 
+    margin: 0 0 10px 0; 
+    font-size: 0.9em; 
+    color: #7f8c8d; 
+}
+
+/* 青いカード内の見出し色 */
+.event h3 { color: rgba(255,255,255,0.8); }
+
+/* スクロールエリアをカードいっぱいに広げる */
 .seasonal-inner-scroll {
-    flex-grow: 1; /* 余ったスペースをすべてスクロールエリアに使う */
+    flex-grow: 1; /* ★余った縦のスペースをすべてスクロールエリアに使う */
     overflow-y: auto;
     padding-right: 5px;
 }
