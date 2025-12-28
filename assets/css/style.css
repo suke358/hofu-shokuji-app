@@ -32,25 +32,40 @@ h1 {
     border-left: 6px solid #ff9800; 
 }
 
-/* イベントカードを青くする */
-/* イベントカードを青くする */
+/* 季節情報のカードスタイル (バランス調整版) */
+.seasonal-container { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 15px; 
+    margin-bottom: 20px; 
+    /* ★カードを横いっぱいに広げる設定 */
+    justify-content: space-between; 
+}
+
+.seasonal-card { 
+    flex: 1; 
+    min-width: 300px; 
+    /* ★高さを揃えるための設定 */
+    height: 180px; 
+    background: white; 
+    padding: 15px; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+    border-left: 6px solid #ff9800; 
+    /* ★中身を縦に整列 */
+    display: flex;
+    flex-direction: column;
+}
+
 .seasonal-card.event { 
     border-left: none;
     background: #2196f3; 
     color: white;
 }
 
-.seasonal-card h3 { 
-    margin: 0 0 8px 0; 
-    font-size: 0.9em; 
-    color: #7f8c8d; 
-}
-
-.event h3 { color: rgba(255,255,255,0.8); }
-
-/* ★スクロールを出すための設定 */
+/* ★カード内のスクロールエリアの高さを固定 */
 .seasonal-inner-scroll {
-    max-height: 120px;
+    flex-grow: 1; /* 余ったスペースをすべてスクロールエリアに使う */
     overflow-y: auto;
     padding-right: 5px;
 }
