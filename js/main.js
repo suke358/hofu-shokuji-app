@@ -118,25 +118,56 @@ function renderTable(data) {
 
 document.querySelector('.close').onclick = () => document.getElementById('modal').style.display = 'none';
 
-// 5. 季節情報（今日の月を取得して表示）
+// 5. 季節情報（今月と来月の予告を表示）
 const currentMonth = new Date().getMonth() + 1;
+
 async function loadSeasonalInfo() {
     const SEASON_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTTaLwPw_Umxz-kntpaLlE8-YJOefutrW2a1B-alKxA77zjQPjWUj8KZZ4PGG89HKssBCO7tlRe9S72/pub?gid=2049390250&single=true&output=csv';
+    
+    // 来月を計算（12月の次は1月にする）
+    const nextMonth = (currentMonth % 12) + 1;
+
     try {
         const res = await fetch(SEASON_URL);
         const text = await res.text();
         const rows = text.trim().split('\n').map(row => row.split(','));
-        const currentMonthData = rows.slice(1).filter(r => parseInt(r[0]) === currentMonth);
+        const dataRows = rows.slice(1);
 
-        if (currentMonthData.length > 0) {
-            const foodList = currentMonthData.map(r => r[1] ? `・${r[1]}` : "").filter(v => v).join('<br>');
-            const eventList = currentMonthData.map(r => r[2] ? `・${r[2]}` : "").filter(v => v).join('<br>');
-            document.getElementById('seasonal-food').innerHTML = foodList || "情報なし";
-            document.getElementById('seasonal-event').innerHTML = eventList || "情報なし";
-            document.getElementById('display-month').textContent = currentMonth;
-            document.getElementById('display-month-event').textContent = currentMonth;
+        // 今月分と来月分をそれぞれ抽出
+        const thisMonthData = dataRows.filter(r => parseInt(r[0]) === currentMonth);
+        const nextMonthData = dataRows.filter(r => parseInt(r[0]) === nextMonth);
+
+        // --- 今月分の表示 ---
+        if (thisMonthData.length > 0) {
+            const foodList = thisMonthData.map(r => r[1] ? `・${r[1]}` : "").filter(v => v).join('<br>');
+            const eventList = thisMonthData.map(r => r[2] ? `・${r[2]}` : "").filter(v => v).join('<br>');
+            
+            document.getElementById('seasonal-food').innerHTML = foodList;
+            document.getElementById('seasonal-event').innerHTML = eventList;
+        } else {
+            document.getElementById('seasonal-food').textContent = "情報なし";
+            document.getElementById('seasonal-event').textContent = "情報なし";
         }
-    } catch (err) { console.error('季節情報失敗', err); }
+        
+        // 月の数字を表示
+        document.getElementById('display-month').textContent = currentMonth;
+        document.getElementById('display-month-event').textContent = currentMonth;
+
+        // --- 来月分（予告）の表示 ---
+        const nextFoodEl = document.getElementById('next-month-food');
+        const nextEventEl = document.getElementById('next-month-event');
+
+        if (nextMonthData.length > 0) {
+            const nextFood = nextMonthData.map(r => r[1]).filter(v => v).join(' / ');
+            const nextEvent = nextMonthData.map(r => r[2]).filter(v => v).join(' / ');
+            
+            if (nextFoodEl) nextFoodEl.innerHTML = `💡 ${nextMonth}月の予告: ${nextFood}`;
+            if (nextEventEl) nextEventEl.innerHTML = `✨ ${nextMonth}月の予告: ${nextEvent}`;
+        }
+
+    } catch (err) { 
+        console.error('季節情報の読み込み失敗:', err); 
+    }
 }
 
 // 実行！
