@@ -32,32 +32,32 @@ h1 {
     border-left: 6px solid #ff9800; 
 }
 
-/* 季節情報のカードスタイル (バランス調整版) */
+/* --- 季節情報のカードスタイル (ここから差し替え) --- */
 .seasonal-container { 
     display: flex; 
     flex-wrap: wrap; 
     gap: 15px; 
     margin-bottom: 20px; 
-    width: 100%; /* 横いっぱいに広げる */
+    width: 100%; 
 }
 
 .seasonal-card { 
-    flex: 1; /* ★左右均等に広がるようにする */
-    min-width: 300px; /* スマホで見ても崩れない最小幅 */
-    height: 180px;   /* ★高さを固定して左右を揃える */
-    background: white; 
+    flex: 1; 
+    min-width: 300px; 
+    height: 180px;   /* 高さを統一 */
+    background: white; /* 背景を白に統一 */
+    color: #333;       /* 文字色を濃いグレーに統一 */
     padding: 15px; 
     border-radius: 12px; 
     box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
-    border-left: 6px solid #ff9800; 
-    display: flex; /* 中身を縦に整列させる準備 */
+    border-left: 6px solid #ff9800; /* 食材カードの左線（オレンジ） */
+    display: flex;
     flex-direction: column;
 }
 
+/* イベントカードの個別設定 */
 .seasonal-card.event { 
-    border-left: #e67e22; /* イベントは全体を青くするので線を消す */
-    background: #ffffff; 
-    color: rgb(29, 28, 28);
+    border-left-color: #2196f3; /* イベントカードの左線（青） */
 }
 
 .seasonal-card h3 { 
@@ -66,12 +66,9 @@ h1 {
     color: #7f8c8d; 
 }
 
-/* 青いカード内の見出し色 */
-.event h3 { color: rgba(255,255,255,0.8); }
-
-/* スクロールエリアをカードいっぱいに広げる */
+/* スクロールエリア */
 .seasonal-inner-scroll {
-    flex-grow: 1; /* ★余った縦のスペースをすべてスクロールエリアに使う */
+    flex-grow: 1; 
     overflow-y: auto;
     padding-right: 5px;
 }
@@ -82,9 +79,11 @@ h1 {
     line-height: 1.6; 
 }
 
-#seasonal-food { color: #e67e22; }
-#seasonal-event { color: #ffffff; }
+/* 文字の色を背景（白）に合わせて調整 */
+#seasonal-food { color: #e67e22; }  /* 食材はオレンジ */
+#seasonal-event { color: #2196f3; } /* イベントは青（白背景で見やすい色） */
 
+/* 来月の予告エリア（共通） */
 .next-month-box {
     margin-top: 10px;
     padding-top: 8px;
@@ -92,11 +91,7 @@ h1 {
     font-size: 0.85em;
     color: #666;
 }
-
-.event .next-month-box {
-    color: #eee;
-    border-top: 1px dashed rgba(255,255,255,0.4);
-}
+/* --- 季節情報のカードスタイル (ここまで) --- */
 
 /* 検索窓とフィルター */
 input[type="text"] { 
