@@ -136,3 +136,6 @@ async function loadSeasonalInfo() {
 
 // 起動時に実行
 loadSeasonalInfo();
+
+// ★ここを追加！ 最初に「食事」のデータを読み込む命令
+switchCategory('食事');
