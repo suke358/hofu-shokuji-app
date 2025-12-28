@@ -107,7 +107,7 @@ const currentMonth = new Date().getMonth() + 1;
 // 季節情報をスプレッドシートから取得して表示
 async function loadSeasonalInfo() {
     // 【重要】「季節情報」タブのCSV URLをここに貼ってください
-    const SEASON_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTTaLwPw_Umxz-kntpaLlE8-YJOefutrW2a1B-alKxA77zjQPjWUj8KZZ4PGG89HKssBCO7tlRe9S72/pub?gid=2040409405&single=true&output=csv';
+    const SEASON_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTTaLwPw_Umxz-kntpaLlE8-YJOefutrW2a1B-alKxA77zjQPjWUj8KZZ4PGG89HKssBCO7tlRe9S72/pub?gid=2049390250&single=true&output=csv';
 
     try {
         const res = await fetch(SEASON_URL);
