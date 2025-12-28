@@ -92,22 +92,28 @@ function renderTable(data) {
 
 // 検索・閉じる処理
 // 検索バーの動作を改良（キーワードに近いものを優先）
+// 検索バーの動作を「超強力版」に改良
 document.getElementById('searchInput').oninput = (e) => {
-    const query = e.target.value.toLowerCase().trim(); // 空白を消して小文字にする
+    // 検索ワードから空白を消し、小文字にし、さらに「全角スペース」も消す
+    const query = e.target.value.toLowerCase().replace(/\s+/g, ""); 
     
     if (query === "") {
-        renderTable(allData); // 空っぽの時は全部出す
+        renderTable(allData);
         return;
     }
 
     const filtered = allData.filter(r => {
-        const name = (r['店名'] || r['お店名'] || "").toLowerCase();
-        const category = (r['カテゴリ'] || "").toLowerCase();
-        const location = (r['場所'] || "").toLowerCase();
+        // データの各項目からも空白をすべて消して比較する
+        const name = (r['店名'] || r['お店名'] || "").replace(/\s+/g, "").toLowerCase();
+        const category = (r['カテゴリ'] || "").replace(/\s+/g, "").toLowerCase();
+        const location = (r['場所'] || "").replace(/\s+/g, "").toLowerCase();
+        const biko = (r['備考'] || "").replace(/\s+/g, "").toLowerCase();
 
-        // 【改良ポイント】店名が検索ワードで「始まる」か、カテゴリが「完全一致」するか
-        // これにより、より意図に近いものが優先的に残ります
-        return name.includes(query) || category === query || location.includes(query);
+        // キーワードが店名、カテゴリ、場所、備考のどこかに含まれているか
+        return name.includes(query) || 
+               category.includes(query) || 
+               location.includes(query) ||
+               biko.includes(query);
     });
 
     renderTable(filtered);
