@@ -91,8 +91,14 @@ function renderTable(data) {
         const tr = document.createElement('tr');
         const price = (r['予算'] && r['予算'] !== '0') ? '¥' + Number(r['予算']).toLocaleString() : '無料/不明';
 
+        // ★ 一覧表に画像を表示する設定
+        // スプレッドシートの「画像URL」列を参照します
+        const imgTag = r['画像URL'] 
+            ? `<img src="${r['画像URL']}" style="width:50px; height:50px; object-fit:cover; border-radius:8px;">`
+            : `<div style="width:50px; height:50px; background:#eee; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:10px; color:#aaa;">No Img</div>`;
+
         tr.innerHTML = `
-            <td><strong>${name}</strong></td>
+            <td>${imgTag}</td> <td><strong>${name}</strong></td>
             <td>${r['カテゴリ'] || '-'}</td>
             <td>${r['場所'] || '-'}</td>
             <td class="stars">${'★'.repeat(Math.min(5, parseInt(r['評価']) || 0))}</td>
@@ -102,6 +108,7 @@ function renderTable(data) {
 
         tr.onclick = () => {
             document.getElementById('modal-title').textContent = name;
+            // モーダルの画像もスプレッドシートの「画像URL」から取得
             document.getElementById('modal-img').src = r['画像URL'] || '';
             document.getElementById('modal-desc').innerHTML = `
                 <p><strong>場所:</strong> ${r['場所'] || '-'}</p>
