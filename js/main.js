@@ -85,20 +85,23 @@ function renderTable(data) {
     tbody.innerHTML = '';
 
     data.forEach(r => {
+        // あなたのスプレッドシートに合わせて「店名」または「お店名」を取得
         const name = r['店名'] || r['お店名'];
         if (!name) return;
 
         const tr = document.createElement('tr');
         const price = (r['予算'] && r['予算'] !== '0') ? '¥' + Number(r['予算']).toLocaleString() : '無料/不明';
 
-        // ★ 一覧表に画像を表示する設定
-        // スプレッドシートの「画像URL」列を参照します
-        const imgTag = r['画像URL'] 
-            ? `<img src="${r['画像URL']}" style="width:50px; height:50px; object-fit:cover; border-radius:8px;">`
+        // ★ 修正ポイント：スプレッドシートの「画像URL」列を正しく取得
+        const imageUrl = r['画像URL']; 
+        
+        const imgTag = imageUrl 
+            ? `<img src="${imageUrl}" style="width:50px; height:50px; object-fit:cover; border-radius:8px;" onerror="this.src='https://via.placeholder.com/50?text=Error'">`
             : `<div style="width:50px; height:50px; background:#eee; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:10px; color:#aaa;">No Img</div>`;
 
         tr.innerHTML = `
-            <td>${imgTag}</td> <td><strong>${name}</strong></td>
+            <td>${imgTag}</td>
+            <td><strong>${name}</strong></td>
             <td>${r['カテゴリ'] || '-'}</td>
             <td>${r['場所'] || '-'}</td>
             <td class="stars">${'★'.repeat(Math.min(5, parseInt(r['評価']) || 0))}</td>
@@ -108,8 +111,8 @@ function renderTable(data) {
 
         tr.onclick = () => {
             document.getElementById('modal-title').textContent = name;
-            // モーダルの画像もスプレッドシートの「画像URL」から取得
-            document.getElementById('modal-img').src = r['画像URL'] || '';
+            // モーダルの画像も更新
+            document.getElementById('modal-img').src = imageUrl || '';
             document.getElementById('modal-desc').innerHTML = `
                 <p><strong>場所:</strong> ${r['場所'] || '-'}</p>
                 <p><strong>費用:</strong> ${price}</p>
