@@ -106,7 +106,7 @@ function renderTable(data) {
             <td>${r['場所'] || '-'}</td>
             <td class="stars">${'★'.repeat(Math.min(5, parseInt(r['評価']) || 0))}</td>
             <td>${price}</td>
-            <td>${r['所要時間'] || '-'}</td>
+            <td>${r['備考'] || '-'}</td>
         `;
 
         tr.onclick = () => {
