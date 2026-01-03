@@ -112,8 +112,8 @@ function renderTable(data) {
             <td>${r['場所'] || '-'}</td>
             <td class="stars">${'★'.repeat(Math.min(5, parseInt(r['評価']) || 0))}</td>
             <td>${price}</td>
-            <td>${r['備考'] || '-'}</td>
-        `;
+            // 「備考」と「所要時間」の両方を確認するようにして、どちらかに文字があれば出す設定です
+            <td>${r['備考'] || r['所要時間'] || '-'}</td>        `;
 
         tr.onclick = () => {
             document.getElementById('modal-title').textContent = name;
