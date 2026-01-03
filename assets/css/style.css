@@ -162,12 +162,38 @@ table {
 }
 
 /* --- テーブルの列幅調整（ここから差し替え） --- */
+/* style.css */
+
+/* テーブル全体のスクロールを確実にする */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* スマホでスイスイ動くように */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px; /* ★列が重ならないよう、全体の横幅を十分に確保 */
+}
+
+/* 全般的なセルの設定 */
 th, td { 
-    padding: 18px 15px; 
+    padding: 15px 10px;
     text-align: left; 
     border-bottom: 1px solid #eee; 
     font-size: 15px;
-    white-space: nowrap; /* 基本は改行しない */
+    /* 他の列は一行で表示 */
+    white-space: nowrap; 
+}
+
+/* 💡 修正の肝：一番右の列（備考）だけを「改行あり・幅広」にする */
+th:last-child, td:last-child {
+    min-width: 300px;      /* ★幅を300px以上に広げる */
+    white-space: normal;   /* ★ここで「改行」を許可する（これで途切れなくなります） */
+    word-break: break-all; /* 長い英単語があっても強制改行 */
+    line-height: 1.5;      /* 文章が複数行になっても読みやすく */
+    color: #555;           /* 少し色を和らげる */
 }
 
 /* 💡 一番右の列（備考）だけを広く、折り返し可能にする設定 */
