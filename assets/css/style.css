@@ -161,21 +161,25 @@ table {
     min-width: 800px;  /* スマホで横スクロールさせるための最低幅を少し広げる */
 }
 
+/* --- テーブルの列幅調整（ここから差し替え） --- */
 th, td { 
-    padding: 18px 15px; /* ★上下の余白を増やして、1行を大きく見せる */
+    padding: 18px 15px; 
     text-align: left; 
     border-bottom: 1px solid #eee; 
-    font-size: 15px;    /* ★文字サイズを少し大きく（14px→15px） */
+    font-size: 15px;
+    white-space: nowrap; /* 基本は改行しない */
 }
 
-/* ★ここから追記：備考欄（一番右の列）のための設定 */
+/* 💡 一番右の列（備考）だけを広く、折り返し可能にする設定 */
 th:last-child, td:last-child {
-    min-width: 150px;     /* 備考が窮屈にならないよう少し幅を確保 */
-    word-break: break-all; /* 長い文章が入っても枠を突き抜けないようにする */
-    color: #666;          /* 備考は少しサブ情報っぽく色を落ち着かせる */
-    font-size: 13px;      /* 備考だけ少し文字を小さくして情報を詰めやすくする */
+    width: 250px;         /* 幅をしっかり確保 */
+    min-width: 200px;     /* スマホでもこれ以上狭くならないように */
+    white-space: normal;  /* 文字数が多い時は自動で改行する */
+    color: #666;          /* 文字色を少し柔らかく */
+    font-size: 13px;      /* 情報を詰めやすいよう少し小さく */
+    line-height: 1.4;     /* 改行した時に読みやすく */
 }
-
+/* --- ここまで差し替え --- */
 
 th { 
     background: #fcfcfc; 
